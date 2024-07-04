@@ -100,7 +100,7 @@ class PluginHooks: # TODO replace with classses
 
         #self.hooks["cpuid"] = [0x559e37,0x559e27,0x559e68]
 
-    def hook(self,state,proj,call_sim):
+    def hook(self,state,proj,call_sim, hooks_dict=None):
         if False: # TODO
             if "std" in self.hooks:
                 for addr in self.hooks["std"]:
@@ -145,6 +145,16 @@ class PluginHooks: # TODO replace with classses
                     call_sim.custom_simproc_windows["custom_hook"]["CPUIDHook"](plength=2),
                     length=2
                 )
+
+        if hooks_dict != None:
+            for k,v in hooks_dict.items():
+                proj.hook(
+                    k,
+                    call_sim.custom_simproc_windows["custom_hook"][v[1]](plength=v[2]),
+                    length = v[2]
+                )
+
+
         # TODO change key per class name and add list for multiple hooks
         for fun in self.hooks.keys():
             if fun == "copy" or fun == "copy_2":

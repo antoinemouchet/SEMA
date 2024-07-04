@@ -176,6 +176,7 @@ class SemaSCDG():
         self.pre_run_thread = config['SCDG_arg'].getboolean('pre_run_thread')
         self.runtime_run_thread = config['SCDG_arg'].getboolean('runtime_run_thread')
         self.post_run_thread = config['SCDG_arg'].getboolean('post_run_thread')
+        self.hook_file_path = config['Hook_plugin_data']['hooks_file']
 
     def save_conf(self):
         """
@@ -473,7 +474,26 @@ class SemaSCDG():
             self.call_sim.custom_hook_windows_symbols(proj)  #TODO ue if (self.is_packed and False) else False,symbs)
 
         if self.hooks_enable:
-            self.plugins.enable_plugin_hooks(self, self.content, state, proj, self.call_sim)
+            try :
+                # Get custom hooks from file if any
+                with open(self.hook_file_path, 'r') as fp:
+                    hooks_data = json.load(fp)
+
+                hooks_dict = {}
+                for k, v in hooks_data.items():
+                    hooks_dict[k] = [bytes.fromhex(v[0]), v[1], int(v[2])]
+                
+            except FileNotFoundError as efile:
+                print(f"Couldn't open {self.hook_file_path}.\n{efile}\nContinuing without custom hooks data.")
+                hooks_dict = None
+            except json.JSONDecodeError as ejson:
+                print(f"Problem with custom hook data json decoding.\n{ejson}\nContinuing without custom hooks data.")
+                hooks_dict = None
+            except Exception as e:
+                print(f"{e}.\nContinuing without custom hooks data.")
+                hooks_dict = None
+
+            self.plugins.enable_plugin_hooks(self, self.content, state, proj, self.call_sim, hooks_dict)
 
     def project_creation(self):
         """Handles project creation and initial analysis setup."""

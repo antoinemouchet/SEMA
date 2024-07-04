@@ -50,9 +50,9 @@ class PluginManager():
                 # elif plugin == "plugin_thread" :
                 #     state.register_plugin("plugin_thread", PluginThread(self, exp_dir, proj, nameFileShort, options))
 
-    def enable_plugin_hooks(self, content, state, proj, call_sim):
+    def enable_plugin_hooks(self, content, state, proj, call_sim, hooks_dict=None):
         self.hooks.initialization(content, is_64bits=proj.arch.name == "AMD64")
-        self.hooks.hook(state,proj,call_sim)
+        self.hooks.hook(state,proj,call_sim, hooks_dict)
 
     def enable_plugin_commands(self, simgr, scdg_graph, exp_dir):
         self.commands.track(simgr, scdg_graph, exp_dir)
